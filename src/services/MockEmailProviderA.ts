@@ -2,7 +2,7 @@ import { EmailJob } from "../models/EmailJob";
 
 export class MockEmailProviderA{
     async send(job: EmailJob): Promise<boolean>{
-        if(Math.random() < 0.7){
+        if(Math.random() < 0.5){
             console.log("Email is send successfully by Email Provider A");
             return true;
         }
