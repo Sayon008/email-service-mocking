@@ -42,7 +42,7 @@ export class EmailService{
             
                 const delay = this.baseDelay * Math.pow(2, attempt);
 
-                console.log(`Wiating for delay ${delay} ms before retrying`);
+                console.log(`Waiting for delay ${delay} ms before retrying`);
 
                 await sleep(delay);
             }
