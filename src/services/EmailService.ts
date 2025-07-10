@@ -1,27 +1,28 @@
 import { resolve } from "path";
 import { EmailJob } from "../models/EmailJob";
 
-function sleep(ms:number){
+export interface EmailProvider{
+    send(job:EmailJob): Promise<boolean>;
+}
+
+function sleep(ms:number):Promise<void>{
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export class EmailService{
 
-    private MockEmailProviderA: any;
-    private MockEmailProviderB: any;
-
     private maxRetries:number = 3;
     private baseDelay:number = 1000;
 
-    private sentEmails: Set<String> = new Set();
-    private emailStatus: Map<String, String> = new Map();
+    private sentEmails: Set<string> = new Set();
+    private emailStatus: Map<string, "sent" | "failed"> = new Map();
 
-    constructor(MockEmailProviderA:any, MockEmailProviderB:any){
-        this.MockEmailProviderA = MockEmailProviderA;
-        this.MockEmailProviderB = MockEmailProviderB;
+    constructor(private providerA: EmailProvider, private providerB: EmailProvider){
+        this.providerA = providerA;
+        this.providerB = providerB;
     }
 
-    private async tryWithRetry(emailProvider: any, job:EmailJob):Promise<boolean>{
+    private async tryWithRetry(emailProvider: EmailProvider, job:EmailJob):Promise<boolean>{
         for(let attempt=0;attempt < this.maxRetries;attempt++){
             try{
                 console.log(`Attempt ${attempt + 1} to send via email provider`);
@@ -54,37 +55,37 @@ export class EmailService{
 
 
 
-    public async sendEmail(job: EmailJob): Promise<boolean>{
+    public async sendEmail(job: EmailJob): Promise<"duplicate" | "success" | "fail">{
 
         if(this.sentEmails.has(job.id)){
-            console.log(`Job Id alredy Present in the Queue ${job.id}`);
-            return true;
+            console.warn(`Job Id alredy Present in the Queue ${job.id}`);
+            return "duplicate";
         }
         
         console.log(`Sending Email via Email Provider A`);
-        const successA = await this.tryWithRetry(this.MockEmailProviderA, job);
+        const successA = await this.tryWithRetry(this.providerA, job);
         
 
         if(successA){
             this.sentEmails.add(job.id);
             this.emailStatus.set(job.id, "sent");
-            return true;
+            return "success";
         }
         
         console.log("Trying with Email Provider B");
-        const successB = await this.tryWithRetry(this.MockEmailProviderB,job);
+        const successB = await this.tryWithRetry(this.providerB,job);
 
         if(successB){
             this.sentEmails.add(job.id);
             this.emailStatus.set(job.id,"sent");
-            return true;
+            return "success";
         }
 
         this.emailStatus.set(job.id, "failed");
-        return false;
+        return "fail";
     }
 
-    public getStatus(id: String): String | undefined{
+    public getStatus(id: string): "sent" | "failed" | undefined{
         return this.emailStatus.get(id);
     }
 }

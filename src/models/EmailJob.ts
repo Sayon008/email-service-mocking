@@ -1,6 +1,6 @@
 export interface EmailJob{
-    id:String;      //Handling idempotency with this
-    to:String;
-    subject:String;
-    body:String;
+    id:string;      //Handling idempotency with this
+    to:string;
+    subject:string;
+    body:string;
 }
