@@ -13,6 +13,9 @@ export class EmailService{
     private maxRetries:number = 3;
     private baseDelay:number = 1000;
 
+    private sentEmails: Set<String> = new Set();
+    private emailStatus: Map<String, String> = new Map();
+
     constructor(MockEmailProviderA:any, MockEmailProviderB:any){
         this.MockEmailProviderA = MockEmailProviderA;
         this.MockEmailProviderB = MockEmailProviderB;
@@ -52,17 +55,36 @@ export class EmailService{
 
 
     public async sendEmail(job: EmailJob): Promise<boolean>{
+
+        if(this.sentEmails.has(job.id)){
+            console.log(`Job Id alredy Present in the Queue ${job.id}`);
+            return true;
+        }
+        
         console.log(`Sending Email via Email Provider A`);
         const successA = await this.tryWithRetry(this.MockEmailProviderA, job);
         
 
         if(successA){
+            this.sentEmails.add(job.id);
+            this.emailStatus.set(job.id, "sent");
             return true;
         }
         
         console.log("Trying with Email Provider B");
         const successB = await this.tryWithRetry(this.MockEmailProviderB,job);
 
-        return successB;
+        if(successB){
+            this.sentEmails.add(job.id);
+            this.emailStatus.set(job.id,"sent");
+            return true;
+        }
+
+        this.emailStatus.set(job.id, "failed");
+        return false;
+    }
+
+    public getStatus(id: String): String | undefined{
+        return this.emailStatus.get(id);
     }
 }
