@@ -25,21 +25,5 @@
   "dependencies": {
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.1"
-  },
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "CommonJS",
-    "rootDir": "src",
-    "outDir": "dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "test",
-    "node_modules"
-  ]
+  } 
 }
