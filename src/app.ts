@@ -59,7 +59,7 @@ app.get('/status/:id', (req, res) => {
         return res.status(404).json({error : "Email Job not found!"});
     }
 
-    return res.json({status});
+    return res.status(200).json({status});
 });
 
 export default app;
