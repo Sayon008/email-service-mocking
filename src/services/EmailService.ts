@@ -1,5 +1,6 @@
 import { resolve } from "path";
 import { EmailJob } from "../models/EmailJob";
+import { Logger } from "../utils/Logger";
 
 export interface EmailProvider{
     send(job:EmailJob): Promise<boolean>;
@@ -25,31 +26,31 @@ export class EmailService{
     private async tryWithRetry(emailProvider: EmailProvider, job:EmailJob):Promise<boolean>{
         for(let attempt=0;attempt < this.maxRetries;attempt++){
             try{
-                console.log(`Attempt ${attempt + 1} to send via email provider`);
+                Logger.info(`Attempt ${attempt + 1} to send via email provider`);
                 
                 const result = await emailProvider.send(job);
 
                 if(result){
-                    console.log('Email Send Successfully');
+                    Logger.info('Email Send Successfully');
                     return true;
                 }
             }
             catch(err){
                 if(err instanceof Error){
-                    console.warn(`Attemp ${attempt + 1} failed: ${err.message}`);
+                    Logger.warn(`Attemp ${attempt + 1} failed: ${err.message}`);
                 }else{
-                    console.log("Unknown:", err);
+                    Logger.info(`Unknown error Occured - ${err}`);
                 }
             
                 const delay = this.baseDelay * Math.pow(2, attempt);
 
-                console.log(`Waiting for delay ${delay} ms before retrying`);
+                Logger.info(`Waiting ${delay}ms before next retry (attemp ${attempt + 1})`);
 
                 await sleep(delay);
             }
         }
 
-        console.log('All retry attemp failed');
+        Logger.info('All retry attemp failed');
         return false;
     }
 
@@ -58,11 +59,11 @@ export class EmailService{
     public async sendEmail(job: EmailJob): Promise<"duplicate" | "success" | "fail">{
 
         if(this.sentEmails.has(job.id)){
-            console.warn(`Job Id alredy Present in the Queue ${job.id}`);
+            Logger.warn(`Job Id alredy Present in the Queue ${job.id}`);
             return "duplicate";
         }
         
-        console.log(`Sending Email via Email Provider A`);
+        Logger.info(`Sending Email via Email Provider A`);
         const successA = await this.tryWithRetry(this.providerA, job);
         
 
@@ -72,7 +73,9 @@ export class EmailService{
             return "success";
         }
         
-        console.log("Trying with Email Provider B");
+        await sleep(500);
+
+        Logger.info("Trying with Email Provider B");
         const successB = await this.tryWithRetry(this.providerB,job);
 
         if(successB){
