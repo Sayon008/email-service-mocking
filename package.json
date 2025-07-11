@@ -25,5 +25,5 @@
   "dependencies": {
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.1"
-  } 
+  }
 }

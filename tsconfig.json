@@ -109,14 +109,12 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
-    "rootDir": "src",
+    "rootDir": ".",
     "outDir": "dist",
+    "types": ["node", "jest"]
   },
   "include": [
-    "src"
+    "src","test"
   ],
-  "exclude": [
-    "test",
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

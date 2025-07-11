@@ -62,4 +62,8 @@ app.get('/status/:id', (req, res) => {
     return res.status(200).json({status});
 });
 
+app.get('/', (req,res) => {
+    res.send("Email Service is deployed and running!");
+});
+
 export default app;
