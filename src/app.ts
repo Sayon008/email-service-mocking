@@ -12,7 +12,7 @@ app.use(express.json())
 
 // Middleware for the rate limiting
 const emailRateLimiter = rateLimit({
-    max:10,     // Max 10 req per sec
+    max:5,     // Max 10 req per sec
     windowMs:60 * 1000, //1 sec
     message:{
         status:429,
